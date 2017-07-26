@@ -32,25 +32,20 @@ class MooMini(object):
         self.height = 32.0;
         self.margin = 4.0; # mm
 
-        self.showMask = False;
+        self.showBleed = False;
 
         # create the canvas object
         self.canvas = canvas.Canvas(filename,pagesize=(self.width*mm,self.height*mm));
         self.canvas.translate(self.margin*mm,self.margin*mm);
 
-    def drawMask(self):
-        # draw safe area boundary...
-        red85 = Color(1.0,0.0,0.0,alpha = 0.15);
-        white = Color(1.0,1.0,1.0);
+    def drawBleed(self):
+        # draw bleed boundary
+        red15 = Color(1.0,0.0,0.0,alpha = 0.15);
         self.canvas.saveState();
         self.canvas.translate(-1*self.margin*mm,-1*self.margin*mm);
-        self.canvas.setFillColor(red85);
-        self.canvas.rect(0.0,0.0,self.width*mm,self.height*mm,stroke=0,fill=1);
-
-        width = (self.width-2*self.margin);
-        height = (self.height-2*self.margin);
-        self.canvas.setFillColor(white);
-        self.canvas.rect(self.margin*mm,self.margin*mm,width*mm,height*mm,stroke=0,fill=1);
+        self.canvas.setStrokeColor(red15);
+        self.canvas.setLineWidth(self.margin*mm);
+        self.canvas.rect(0.5*self.margin*mm,0.5*self.margin*mm,(self.width-self.margin)*mm,(self.height-self.margin)*mm,stroke=1,fill=0);
         self.canvas.restoreState();
 
     def save(self):
@@ -95,11 +90,11 @@ class FlashCard(MooMini):
         self.canvas.restoreState();
 
     def draw(self):
-        if self.showMask:
-            self.drawMask();
         self.drawHeader(self.head);
         self.drawText(self.txt);
         self.drawFooter(self.foot);
+        if self.showBleed:
+            self.drawBleed();
         self.canvas.showPage();
 
 
@@ -134,6 +129,8 @@ class ZigZag(MooMini):
             for ii in range(len(x)-1):
                 self.canvas.line(x[ii]*mm,y[ii]*mm,x[ii+1]*mm,y[ii+1]*mm);
         self.canvas.restoreState(); # center
+
+        # draw the label
         self.canvas.setFillColor(Color(1.0,1.0,1.0)); # white
         self.canvas.circle(0.0,0.0,10*mm+2,stroke=0,fill=1);
         self.canvas.circle(0.0,0.0,10*mm,stroke=1,fill=1);
@@ -189,13 +186,12 @@ def main(args):
                 rank = 0;
             fname = "{0}_{1}.pdf".format(rank,word);
             fname = os.path.join(getattr(args,'path'),fname);
-            logging.info("fname = %s.", fname);
             myCard = FlashCard(fname,word,"",rank);
-#            myCard.showMask = True;
+            # myCard.showBleed = True;
             myCard.save();
             cnt = cnt + 1;
 
-        logging.info("Ok. Read %i words.", cnt);
+        logging.info("Ok. Wrote %i cards.", cnt);
 
     return(0);
 
@@ -207,7 +203,7 @@ if __name__ == "__main__":
 
     version = "%s v%s" % (prog, rev);
 
-    p = ArgumentParser(usage = "%(prog)s [options] PTH",
+    p = ArgumentParser(usage = "%(prog)s [options] PATH",
                        description = __doc__,
                        conflict_handler = "resolve");
 
@@ -236,6 +232,12 @@ if __name__ == "__main__":
                    metavar = "FILE",
                    dest = "csvfile",
                    help = "read text from FILE in csv format");
+    # p.add_argument("-o","--output",
+    #                action = 'store',
+    #                default = ".",
+    #                metavar = "PATH",
+    #                dest = "path",
+    #                help = "save output in PATH");
 
     args = p.parse_args();
     exit(main(args));
