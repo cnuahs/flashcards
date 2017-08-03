@@ -18,4 +18,4 @@ $ cat oxford_wordlist.csv | ./flashcards.py ./pdfs/
 
 produces one .pdf file (e.g., [rank]_[word].pdf) in ./pdfs/ for each card, containing a single word from the wordlist together with its rank. These .pdf files can be uploaded at [Moo.com](http://moo.com/) to produce high quality flashcards.
 
-![alt text](https://github.com/cnuahs/flashcards/images/Photo_2017-08-03.jpg "Moo MiniCard Flashcards")
+![alt text](https://github.com/cnuahs/flashcards/blob/master/images/Photo_2017-08-03.jpg "Moo MiniCard Flashcards")
